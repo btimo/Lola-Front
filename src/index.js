@@ -9,7 +9,6 @@ import {
   BrowserRouter as Router,
   Route,
 } from 'react-router-dom';
-import createBrowserHistory from 'history/createBrowserHistory';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import 'sanitize.css';
@@ -18,6 +17,8 @@ import './index.css';
 import reducer from './reducers';
 
 import App from './containers/App';
+
+import { CustomHistory } from './utils/router';
 
 
 // Needed for onTouchTap
@@ -45,7 +46,7 @@ const store = createStore(
 render(
   <MuiThemeProvider>
     <Provider store={store}>
-      <Router history={createBrowserHistory()}>
+      <Router history={CustomHistory}>
         <Route component={App} />
       </Router>
     </Provider>

@@ -1,12 +1,29 @@
 import React, { Component } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
+
 import AppBar from 'material-ui/AppBar';
-import Drawer from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
 import './App.css';
 
+import CustomDrawer from '../CustomDrawer';
 import Home from '../Home';
 import Login from '../Login';
+import Profile from '../Profile';
+import Patients from '../Patients';
+import MyData from '../MyData';
+import Estimator from '../Estimator';
+import ResetPassword from '../ResetPassword';
+import Register from '../Register';
+
+import {
+  HOME,
+  LOGIN,
+  MY_PROFILE,
+  MY_PATIENTS,
+  MY_DATA,
+  ESTIMATOR,
+  RESET_PASSWORD,
+  REGISTER,
+} from '../../constants/paths';
 
 
 class App extends Component {
@@ -17,18 +34,7 @@ class App extends Component {
         width: '100%',
         display: 'flex',
       }}>
-        <Drawer
-          containerStyle={{
-            position: 'inherit',
-          }}
-          style={{
-            height: '100%',
-          }}
-          open
-        >
-          <MenuItem>Accueil</MenuItem>
-          <MenuItem>Se connecter</MenuItem>
-        </Drawer>
+        <CustomDrawer />
         <div
           style={{
             flex: 1,
@@ -38,11 +44,18 @@ class App extends Component {
         >
           <AppBar
             title="LoLa"
-            iconClassNameRight="muidocs-icon-navigation-expand-more"
+            showMenuIconButton={false}
           />
           <Switch>
-            <Route exact path="/login" component={Login} />
-            <Route component={Home} />
+            <Route exact path={HOME} component={Home} />
+            <Route exact path={LOGIN} component={Login} />
+            <Route exact path={MY_DATA} component={MyData} />
+            <Route exact path={ESTIMATOR} component={Estimator} />
+            <Route exact path={MY_PROFILE} component={Profile} />
+            <Route exact path={MY_PATIENTS} component={Patients} />
+            <Route exact path={REGISTER} component={Register} />
+            <Route exact path={RESET_PASSWORD} component={ResetPassword} />
+            <Redirect to="/home" />
           </Switch>
         </div>
       </div>

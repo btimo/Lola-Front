@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { firebaseConnect, dataToJS } from 'react-redux-firebase';
 import { connect } from 'react-redux';
+import { UserIsNotAuthenticated } from '../../utils/router';
 
 import LoginComponent from '../../components/Login';
 
@@ -26,4 +27,4 @@ class Login extends Component {
 
 export default connect(({ firebase }) => ({
   authError: dataToJS(firebase, 'authError'),
-}))(firebaseConnect()(Login));
+}))(firebaseConnect()(UserIsNotAuthenticated(Login)));
