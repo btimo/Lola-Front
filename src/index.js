@@ -6,9 +6,10 @@ import { Provider } from 'react-redux';
 import { reactReduxFirebase } from 'react-redux-firebase';
 import thunk from 'redux-thunk';
 import {
-  BrowserRouter as Router,
   Route,
 } from 'react-router-dom';
+import { ConnectedRouter, routerMiddleware} from 'react-router-redux';
+import createBrowserHistory from 'history/createBrowserHistory';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import 'sanitize.css';
@@ -17,9 +18,6 @@ import './index.css';
 import reducer from './reducers';
 
 import App from './containers/App';
-
-import { CustomHistory } from './utils/router';
-
 
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
@@ -33,7 +31,9 @@ const firebaseConfig = {
   storageBucket: "lola-office.appspot.com",
 };
 
-const middleware = [ thunk ];
+const history = createBrowserHistory();
+
+const middleware = [ thunk, routerMiddleware(history) ];
 
 const store = createStore(
   reducer,
@@ -46,9 +46,9 @@ const store = createStore(
 render(
   <MuiThemeProvider>
     <Provider store={store}>
-      <Router history={CustomHistory}>
+      <ConnectedRouter history={history}>
         <Route component={App} />
-      </Router>
+      </ConnectedRouter>
     </Provider>
   </MuiThemeProvider>,
   document.getElementById('root')

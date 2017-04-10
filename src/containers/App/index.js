@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { Route, Switch, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import setPageTitleHoc from '../setPageTitleHoc';
 
 import AppBar from 'material-ui/AppBar';
 import './App.css';
+import 'mdi/css/materialdesignicons.min.css';
 
 import CustomDrawer from '../CustomDrawer';
 import Home from '../Home';
@@ -33,6 +36,7 @@ class App extends Component {
         height: '100%',
         width: '100%',
         display: 'flex',
+        overflow: 'hidden',
       }}>
         <CustomDrawer />
         <div
@@ -43,18 +47,18 @@ class App extends Component {
           }}
         >
           <AppBar
-            title="LoLa"
+            title={this.props.pageTitle}
             showMenuIconButton={false}
           />
           <Switch>
-            <Route exact path={HOME} component={Home} />
-            <Route exact path={LOGIN} component={Login} />
-            <Route exact path={MY_DATA} component={MyData} />
-            <Route exact path={ESTIMATOR} component={Estimator} />
-            <Route exact path={MY_PROFILE} component={Profile} />
-            <Route exact path={MY_PATIENTS} component={Patients} />
-            <Route exact path={REGISTER} component={Register} />
-            <Route exact path={RESET_PASSWORD} component={ResetPassword} />
+            <Route exact path={HOME} component={setPageTitleHoc('LOLA - Accueil')(Home)} />
+            <Route exact path={LOGIN} component={setPageTitleHoc('LOLA - Se connecter')(Login)} />
+            <Route exact path={MY_DATA} component={setPageTitleHoc('LOLA - Mes données')(MyData)} />
+            <Route exact path={ESTIMATOR} component={setPageTitleHoc('LOLA - Estimation glycémique')(Estimator)} />
+            <Route exact path={MY_PROFILE} component={setPageTitleHoc('LOLA - Mon profil')(Profile)} />
+            <Route exact path={MY_PATIENTS} component={setPageTitleHoc('LOLA - Mes patients')(Patients)} />
+            <Route exact path={REGISTER} component={setPageTitleHoc('LOLA - S\'inscrire')(Register)} />
+            <Route exact path={RESET_PASSWORD} component={setPageTitleHoc('LOLA - Réinitialiser mon mot de passe')(ResetPassword)} />
             <Redirect to="/home" />
           </Switch>
         </div>
@@ -63,4 +67,8 @@ class App extends Component {
   }
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  pageTitle: state.app.title,
+});
+
+export default connect(mapStateToProps)(App);

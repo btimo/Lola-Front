@@ -1,12 +1,11 @@
 import { UserAuthWrapper } from 'redux-auth-wrapper';
 import { pathToJS } from 'react-redux-firebase';
-import createBrowserCustomHistory from 'history/createBrowserHistory';
+import { replace } from 'react-router-redux';
 import LoadingSpinner from '../components/LoadingSpinner';
 import {
   HOME,
 } from '../constants/paths';
 
-const CustomHistory = createBrowserCustomHistory();
 
 const AUTHED_REDIRECT = 'AUTHED_REDIRECT';
 const UNAUTHED_REDIRECT = 'UNAUTHED_REDIRECT';
@@ -26,7 +25,7 @@ export const UserIsAuthenticated = UserAuthWrapper({ // eslint-disable-line new-
   (pathToJS(firebase, 'isInitializing') === true),
   predicate: auth => auth !== null,
   redirectAction: newLoc => (dispatch) => {
-    CustomHistory.replace(newLoc);
+    dispatch(replace(newLoc));
     dispatch({
       type: UNAUTHED_REDIRECT,
       payload: { message: 'User is not authenticated.' }
@@ -47,7 +46,7 @@ export const UserIsDoctor = UserAuthWrapper({ // eslint-disable-line new-cap
   predicate: profile => profile !== null && profile.type === 'doctor',
   failureRedirectPath: HOME,
   redirectAction: newLoc => (dispatch) => {
-    CustomHistory.replace(newLoc);
+    dispatch(replace(newLoc));
     dispatch({
       type: UNAUTHED_REDIRECT,
       payload: { message: 'User is not a doctor.' }
@@ -68,7 +67,7 @@ export const UserIsPatient = UserAuthWrapper({ // eslint-disable-line new-cap
   predicate: profile => profile !== null && profile.type === 'patient',
   failureRedirectPath: HOME,
   redirectAction: newLoc => (dispatch) => {
-    CustomHistory.replace(newLoc);
+    dispatch(replace(newLoc));
     dispatch({
       type: UNAUTHED_REDIRECT,
       payload: { message: 'User is not a patient.' }
@@ -89,14 +88,14 @@ export const UserIsNotAuthenticated = UserAuthWrapper({ // eslint-disable-line n
   wrapperDisplayName: 'UserIsNotAuthenticated',
   allowRedirectBack: false,
   LoadingComponent: LoadingSpinner,
-  failureRedirectPath: (state, props) => (props.location.query && props.location.query.redirect) || HOME,
+  failureRedirectPath: (state, props) => HOME,
   authSelector: ({ firebase }) => pathToJS(firebase, 'auth'),
   authenticatingSelector: ({ firebase }) =>
   (pathToJS(firebase, 'auth') === undefined) ||
   (pathToJS(firebase, 'isInitializing') === true),
   predicate: auth => auth === null,
   redirectAction: newLoc => (dispatch) => {
-    CustomHistory.replace(newLoc);
+    dispatch(replace(newLoc));
     dispatch({ type: AUTHED_REDIRECT })
   }
 });
@@ -106,5 +105,4 @@ export default {
   UserIsNotAuthenticated,
   UserIsDoctor,
   UserIsPatient,
-  CustomHistory,
 }

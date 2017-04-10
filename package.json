@@ -4,11 +4,13 @@
   "private": true,
   "dependencies": {
     "material-ui": "^0.17.2",
+    "mdi": "^1.9.33",
     "react": "^15.5.3",
     "react-dom": "^15.5.3",
     "react-redux": "^5.0.4",
     "react-redux-firebase": "^1.4.0-rc.1",
     "react-router-dom": "^4.0.0",
+    "react-router-redux": "^5.0.0-alpha.4",
     "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0",
     "redux-auth-wrapper": "^1.0.0",
