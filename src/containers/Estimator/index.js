@@ -1,12 +1,19 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 import { Field, reduxForm } from 'redux-form';
+import { firebaseConnect, dataToJS } from 'react-redux-firebase';
 import {
   TextField,
   AutoComplete as RFAutoComplete,
 } from 'redux-form-material-ui';
 import createComponent from 'redux-form-material-ui/lib/createComponent';
 import mapError from 'redux-form-material-ui/lib/mapError';
+
+import filter from 'lodash/filter';
+import keys from 'lodash/keys';
+import get from 'lodash/get';
+import compact from 'lodash/compact';
 
 // Material UI elements
 import Paper from 'material-ui/Paper';
@@ -31,40 +38,7 @@ const CustomAutoComplete = createComponent(
   }),
 );
 
-const fruit = [
-  'Apple', 'Apricot', 'Avocado',
-  'Banana', 'Bilberry', 'Blackberry', 'Blackcurrant', 'Blueberry',
-  'Boysenberry', 'Blood Orange',
-  'Cantaloupe', 'Currant', 'Cherry', 'Cherimoya', 'Cloudberry',
-  'Coconut', 'Cranberry', 'Clementine',
-  'Damson', 'Date', 'Dragonfruit', 'Durian',
-  'Elderberry',
-  'Feijoa', 'Fig',
-  'Goji berry', 'Gooseberry', 'Grape', 'Grapefruit', 'Guava',
-  'Honeydew', 'Huckleberry',
-  'Jabouticaba', 'Jackfruit', 'Jambul', 'Jujube', 'Juniper berry',
-  'Kiwi fruit', 'Kumquat',
-  'Lemon', 'Lime', 'Loquat', 'Lychee',
-  'Nectarine',
-  'Mango', 'Marion berry', 'Melon', 'Miracle fruit', 'Mulberry', 'Mandarine',
-  'Olive', 'Orange',
-  'Papaya', 'Passionfruit', 'Peach', 'Pear', 'Persimmon', 'Physalis', 'Plum', 'Pineapple',
-  'Pumpkin', 'Pomegranate', 'Pomelo', 'Purple Mangosteen',
-  'Quince',
-  'Raspberry', 'Raisin', 'Rambutan', 'Redcurrant',
-  'Salal berry', 'Satsuma', 'Star fruit', 'Strawberry', 'Squash', 'Salmonberry',
-  'Tamarillo', 'Tamarind', 'Tomato', 'Tangerine',
-  'Ugli fruit',
-  'Watermelon',
-];
-
-const calculateGlucides = (form) => {
-  console.log(form);
-
-  return 100;
-};
-
-const Row = ({ id, index, deleteRowHandler }) => (
+const Row = ({ id, index, deleteRowHandler, data }) => (
   <div
     style={{
       display: 'flex',
@@ -86,9 +60,10 @@ const Row = ({ id, index, deleteRowHandler }) => (
       name={`aliments-${id}`}
       component={CustomAutoComplete}
       floatingLabelText="Taper le nom de votre aliments"
-      filter={RFAutoComplete.fuzzyFilter}
-      dataSource={fruit}
+      filter={AutoComplete.fuzzyFilter}
+      dataSource={data}
       maxSearchResults={5}
+      fullWidth
     />
     <Field
       style={{ flex: 2 }}
@@ -146,6 +121,7 @@ class Estimator extends Component {
     this.setState({
       rows: [this.state.counter++],
     });
+    this.props.reset();
   }
 
   render() {
@@ -199,6 +175,7 @@ class Estimator extends Component {
                 id={r}
                 index={index}
                 deleteRowHandler={() => this.removeRow(r)}
+                data={this.props.alimentsDisplay}
               />
             ))}
           </div>
@@ -212,24 +189,101 @@ class Estimator extends Component {
             zIndex: 30,
           }}
         >
-          <ToolbarTitle text="Quantité de glucides consommés"/>
           <div
             style={{
-              fontSize: '1.4rem',
+              display: 'flex',
+            }}
+          >
+            <ToolbarTitle text="Quantité de glucides consommés"/>
+            <div
+              style={{
+                fontSize: '1.4rem',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {this.props.calc}
+            </div>
+          </div>
+          <div
+            style={{
               display: 'flex',
               alignItems: 'center',
             }}
           >
-            {this.props.calc}
+            <FontIcon
+              className="mdi mdi-arrow-right"
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+            }}
+          >
+            <ToolbarTitle text="Dose bolus conseillée"/>
+            <div
+              style={{
+                fontSize: '1.4rem',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              {(this.props.calc * 1.5) / 100}
             </div>
+          </div>
         </Toolbar>
       </div>
     );
   }
 }
 
-export default connect((state) => ({
-  calc: calculateGlucides(state.form.estimator),
-}))(reduxForm({
+const getAliments = state => dataToJS(state.firebase, 'aliments') || [];
+
+const getAlimentsDisplay  = createSelector(
+  getAliments,
+  aliments => aliments && aliments.map(a => `${a.name} - ${a.glucides} / 100g`),
+);
+
+const getFormValues = state => get(state, 'form.estimator.values', {});
+
+const calculateGlucides = createSelector(
+  [getFormValues, getAlimentsDisplay, getAliments],
+  (values, display, data) => {
+    // keys of the form 'aliments-X', x being a number
+    const alimentValues = filter(keys(values), k => k.includes('aliments-'));
+
+    const cleanedValues = alimentValues.map(a => {
+      // finding X
+      const r = a.replace('aliments-', '');
+      // finding amount corresponding to X
+      const amount = values[`amount-${r}`];
+
+      if (amount) {
+        return {
+          'aliment': data[display.findIndex(d => d === values[a])],
+          amount,
+        }
+      }
+      return null;
+    });
+
+    const cleanse = compact(cleanedValues);
+
+    return cleanse && cleanse.reduce((acc, elem) => ((elem.aliment.glucides * elem.amount) / 100) + acc, 0);
+  }
+);
+
+export default connect((state) => {
+  const aliments = getAliments(state);
+  const alimentsDisplay = getAlimentsDisplay(state);
+
+  return {
+    calc: calculateGlucides(state),
+    aliments,
+    alimentsDisplay,
+  }
+})(firebaseConnect([
+  '/aliments',
+])(reduxForm({
   form: 'estimator',
-})(Estimator));
+})(Estimator)));
