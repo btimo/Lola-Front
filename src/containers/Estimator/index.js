@@ -186,7 +186,7 @@ class Estimator extends Component {
               justifyContent: 'space-around',
             }}
           >
-            <ToolbarTitle text="Quantité de glucides consommés"/>
+            <ToolbarTitle text="Glucides"/>
             <div
               style={{
                 fontSize: '1.4rem',
@@ -194,7 +194,7 @@ class Estimator extends Component {
                 alignItems: 'center',
               }}
             >
-              {this.props.calc} g
+              {this.props.calc.toLocaleString('fr', { maximumFractionDigits: 1 })} g
             </div>
           </div>
           <div

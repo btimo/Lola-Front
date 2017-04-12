@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { firebaseConnect, pathToJS, populatedDataToJS, dataToJS } from 'react-redux-firebase';
 import { reduxForm, Field } from 'redux-form';
-import omit from 'lodash/omit';
+import find from 'lodash/find';
 import map from 'lodash/map';
+import reduce from 'lodash/reduce';
 
 // Material UI
 import FloatingActionButton from 'material-ui/FloatingActionButton';
@@ -17,7 +18,12 @@ import Dialog from 'material-ui/Dialog';
 import CustomAutoComplete from '../../components/CustomAutoComplete';
 
 import { UserIsAuthenticated, UserIsDoctor } from '../../utils/router';
-import { filterObject } from '../../utils/utils';
+
+import {
+  getAuthUID,
+  getMyPatients,
+  getNewPatients,
+} from '../../selectors';
 
 const patientDialogActions = (handleClose, handleSubmit) => ([
   <FlatButton
@@ -71,6 +77,7 @@ class PatientFormDialog extends Component {
       patient: newPArray.find(p => p.text === values.patient).value,
       status: 'invit',
     });
+    this.props.handleClose();
   }
 
   render() {
@@ -137,23 +144,14 @@ const populates = [
 ];
 
 const mapStateToProps = (state) => {
-  const users = dataToJS(state.firebase, 'users');
-  const auth = pathToJS(state.firebase, 'auth');
-  const authUID = auth ? auth.uid : null;
-  const patients = users ? filterObject(users, u => u.type === 'patient') : null;
-  const links = populatedDataToJS(state.firebase, 'links', populates);
-  const myPatients = links ? filterObject(links, l => l.doctor === authUID) : null;
-  console.log(myPatients);
-  const newPatients = myPatients ? omit(patients, Object.keys(myPatients)): patients;
-
   return {
-    authUID,
-    newPatients,
-    myPatients,
+    authUID: getAuthUID(state),
+    newPatients: getNewPatients(state),
+    myPatients: getMyPatients(state),
   }
 };
 
 export default connect(mapStateToProps)(firebaseConnect([
   'users',
-  { path: 'links', populates},
+  'links',
 ])(UserIsAuthenticated(UserIsDoctor(Patients))));
