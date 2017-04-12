@@ -181,7 +181,7 @@ class Profile extends Component {
     return (
       <div
         style={{
-          height: 'calc(100% - 64px)',
+          flex: 1,
           padding: 20,
           display: 'flex',
           position: 'relative',
