@@ -34,7 +34,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      openedDrawer: window.innerWidth > 780,
+      openedDrawer: !window.matchMedia('only screen and (max-width: 760px)').matches,
     }
   }
 
@@ -52,6 +52,7 @@ class App extends Component {
       }}>
         <CustomDrawer
           opened={this.state.openedDrawer}
+          toggleDrawer={() => this.toggleDrawer()}
         />
         <div
           style={{
