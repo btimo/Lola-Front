@@ -1,0 +1,79 @@
+#estimator {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+}
+
+#estimator-paper {
+  margin-bottom: 76px;
+  display: flex;
+  flex-direction: column;
+}
+
+#estimator-paper-actions {
+  padding: 20px;
+  background-color: rgb(232, 232, 232);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.estimator-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: baseline;
+  min-height: 86px;
+  padding: 0 10px
+}
+
+.estimator-row-inputs {
+  display: flex;
+  flex: 4;
+}
+
+#estimator-toolbar {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 30;
+  display: flex;
+}
+
+.estimator-toolbar-part {
+  flex: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+@media only screen and (max-width: 760px) {
+  #estimator-paper-actions {
+    flex-direction: column;
+    justify-content: center;
+    min-height: 112px;
+  }
+
+  .estimator-row-inputs {
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .estimator-row {
+    align-items: center;
+    min-height: 144px;
+  }
+
+  #estimator-toolbar {
+    flex-direction: column;
+    height: 150px !important;
+  }
+
+  #estimator-toolbar-arrow span::before {
+    transform: rotate(90deg);
+  }
+}

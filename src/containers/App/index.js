@@ -45,8 +45,8 @@ class App extends Component {
   render() {
     return (
       <div style={{
-        height: '100%',
-        width: '100%',
+        height: '100vh',
+        width: '100vw',
         display: 'flex',
         overflow: 'hidden',
       }}>
@@ -62,6 +62,9 @@ class App extends Component {
           }}
         >
           <AppBar
+            style={{
+              width: '100vw',
+            }}
             title={this.props.pageTitle}
             onLeftIconButtonTouchTap={() => this.toggleDrawer()}
           />

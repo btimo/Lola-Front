@@ -40,7 +40,7 @@ const patientDialogActions = (handleClose, handleSubmit) => ([
 
 const PatientDialogForm = ({ data, handleClose, handleSubmit }) => (
   <Dialog
-    title="Dialog With Actions"
+    title="Ajouter un patient"
     actions={patientDialogActions(handleClose, handleSubmit)}
     modal={false}
     open

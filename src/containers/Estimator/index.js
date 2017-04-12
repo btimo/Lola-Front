@@ -1,82 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { Field, reduxForm } from 'redux-form';
+import { reduxForm } from 'redux-form';
 import { firebaseConnect, dataToJS } from 'react-redux-firebase';
-import {
-  TextField,
-} from 'redux-form-material-ui';
-import CustomAutoComplete from '../../components/CustomAutoComplete';
 
 import filter from 'lodash/filter';
 import keys from 'lodash/keys';
 import get from 'lodash/get';
 import compact from 'lodash/compact';
 
-// Material UI elements
-import Paper from 'material-ui/Paper';
-import AutoComplete from 'material-ui/AutoComplete';
-import IconButton from 'material-ui/IconButton';
-import FlatButton from 'material-ui/FlatButton';
-import FontIcon from 'material-ui/FontIcon';
-import RaisedButton from 'material-ui/RaisedButton';
-import Toolbar from 'material-ui/Toolbar/Toolbar';
-import ToolbarTitle from 'material-ui/Toolbar/ToolbarTitle'
-//
-
-const Row = ({ id, index, deleteRowHandler, data }) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-around',
-      alignItems: 'baseline',
-      minHeight: 86,
-      paddingLeft: 10,
-      paddingRight: 10,
-    }}
-  >
-    <div style={{
-      flex: 1,
-      textAlign: 'center',
-    }}>
-      {`#${index + 1}`}
-    </div>
-    <Field
-      style={{ flex: 2 }}
-      name={`aliments-${id}`}
-      component={CustomAutoComplete}
-      floatingLabelText="Taper le nom de votre aliments"
-      filter={AutoComplete.fuzzyFilter}
-      dataSource={data}
-      maxSearchResults={5}
-      fullWidth
-    />
-    <Field
-      style={{ flex: 2 }}
-      name={`amount-${id}`}
-      component={TextField}
-      floatingLabelText="Quantité de votre aliment (en g)"
-      type="number"
-    />
-    <div
-      style={{
-        flex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-    >
-      <IconButton
-        tooltip="supprimer"
-        tooltipPosition="bottom-center"
-        onTouchTap={() => deleteRowHandler()}
-      >
-        <FontIcon className="mdi mdi-delete" />
-      </IconButton>
-    </div>
-
-  </div>
-);
+import EstimatorComponent from '../../components/Estimator';
 
 class Estimator extends Component {
   constructor(props){
@@ -115,118 +48,15 @@ class Estimator extends Component {
     const dose = (this.props.calc * 1.5) / 10;
 
     return (
-      <div
-        style={{
-          flex: 1,
-          padding: 20,
-          display: 'flex',
-          position: 'relative',
-          flexDirection:'column',
-        }}
-      >
-        <Paper
-          style={{
-            marginBottom: 76,
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <div
-            style={{
-              padding: '20px',
-              backgroundColor: 'rgb(232, 232, 232)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end'
-            }}
-          >
-            <RaisedButton
-              label="Ajouter un aliment"
-              onTouchTap={this.addRow}
-              primary
-            />
-            <FlatButton
-              label="Réinitialiser la grille"
-              onTouchTap={this.reset}
-            />
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              overflowY: 'scroll',
-              paddingBottom: 10,
-            }}
-          >
-            {this.state.rows.map((r, index) => (
-              <Row
-                key={`row${r}`}
-                id={r}
-                index={index}
-                deleteRowHandler={() => this.removeRow(r)}
-                data={this.props.alimentsDisplay}
-              />
-            ))}
-          </div>
-        </Paper>
-        <Toolbar
-          style={{
-            position: 'absolute',
-            bottom: 20,
-            left: 20,
-            right: 20,
-            zIndex: 30,
-            display: 'flex',
-          }}
-        >
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              justifyContent: 'space-around',
-            }}
-          >
-            <ToolbarTitle text="Glucides"/>
-            <div
-              style={{
-                fontSize: '1.4rem',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {this.props.calc.toLocaleString('fr', { maximumFractionDigits: 1 })} g
-            </div>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <FontIcon
-              className="mdi mdi-arrow-right"
-            />
-          </div>
-          <div
-            style={{
-              flex: 1,
-              display: 'flex',
-              justifyContent: 'space-around',
-            }}
-          >
-            <ToolbarTitle text="Dose bolus conseillée"/>
-            <div
-              style={{
-                fontSize: '1.4rem',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {dose.toLocaleString('fr', { maximumFractionDigits: 1 })} U
-            </div>
-          </div>
-        </Toolbar>
-      </div>
+      <EstimatorComponent
+        addRow={this.addRow}
+        reset={this.reset}
+        rows={this.state.rows}
+        removeRow={(id) => this.removeRow(id)}
+        alimentsDisplay={this.props.alimentsDisplay}
+        calc={this.props.calc}
+        dose={dose}
+      />
     );
   }
 }
