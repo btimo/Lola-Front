@@ -189,11 +189,14 @@ class Estimator extends Component {
             left: 20,
             right: 20,
             zIndex: 30,
+            display: 'flex',
           }}
         >
           <div
             style={{
+              flex: 1,
               display: 'flex',
+              justifyContent: 'space-around',
             }}
           >
             <ToolbarTitle text="Quantité de glucides consommés"/>
@@ -204,7 +207,7 @@ class Estimator extends Component {
                 alignItems: 'center',
               }}
             >
-              {this.props.calc}
+              {this.props.calc} g
             </div>
           </div>
           <div
@@ -219,7 +222,9 @@ class Estimator extends Component {
           </div>
           <div
             style={{
+              flex: 1,
               display: 'flex',
+              justifyContent: 'space-around',
             }}
           >
             <ToolbarTitle text="Dose bolus conseillée"/>
@@ -230,7 +235,7 @@ class Estimator extends Component {
                 alignItems: 'center',
               }}
             >
-              {dose.toLocaleString('fr', { maximumFractionDigits: 1 })}
+              {dose.toLocaleString('fr', { maximumFractionDigits: 1 })} U
             </div>
           </div>
         </Toolbar>
