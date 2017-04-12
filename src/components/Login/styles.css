@@ -1,24 +1,18 @@
-#profile {
+#login {
   flex: 1;
-  padding: 20px;
   display: flex;
-  position: relative;
-  flex-direction:column;
+  align-items: center;
+  justify-content: center;
 }
 
-#profile-form {
-
-}
-
-#profile-form-inputs {
-  padding: 20px;
+#login-form {
   display: flex;
   align-items: center;
   justify-content: space-around;
 }
 
 @media only screen and (max-width: 760px) {
-  #profile-form-inputs {
+  #login-form {
     flex-direction: column;
   }
 }

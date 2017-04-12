@@ -6,14 +6,11 @@ import {
 import RaisedButton from 'material-ui/RaisedButton';
 import Paper from 'material-ui/Paper';
 
+import './styles.css';
+
 const Login = ({ handleSubmit, submitting }) => (
   <div
-    style={{
-      flex: 1,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}
+    id="login"
   >
     <Paper
       zDepth={1}
@@ -23,11 +20,7 @@ const Login = ({ handleSubmit, submitting }) => (
     >
       <form onSubmit={handleSubmit}>
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-          }}
+          id="login-form"
         >
           <Field
             name="email"
@@ -45,12 +38,19 @@ const Login = ({ handleSubmit, submitting }) => (
             hintText="123password"
           />
         </div>
-        <RaisedButton
-          label="Se connecter"
-          primary
-          type="submit"
-          disabled={submitting}
-        />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <RaisedButton
+            label="Se connecter"
+            primary
+            type="submit"
+            disabled={submitting}
+          />
+        </div>
       </form>
     </Paper>
   </div>

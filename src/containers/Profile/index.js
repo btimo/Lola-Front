@@ -27,7 +27,9 @@ import { UserIsAuthenticated } from '../../utils/router';
 import './styles.css';
 
 const ProfileForm = ({ mode, setEditMode, setReadMode, handleSubmit }) => (
-  <div>
+  <div
+    id="profile-form"
+  >
     <div
       style={{
         padding: 20,
@@ -49,11 +51,7 @@ const ProfileForm = ({ mode, setEditMode, setReadMode, handleSubmit }) => (
       )}
     </div>
     <div
-      style={{
-        padding: 20,
-        display: 'flex',
-        justifyContent: 'space-around'
-      }}
+      id="profile-form-inputs"
     >
       <Field
         name="lastname"
