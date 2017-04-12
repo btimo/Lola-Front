@@ -15,7 +15,7 @@ import {
   LOGIN,
 } from '../../constants/paths';
 
-const CustomDrawer = ({ auth, profile, history, firebase }) => (
+const CustomDrawer = ({ opened, auth, profile, history, firebase }) => (
   <Drawer
     containerStyle={{
       position: 'inherit',
@@ -23,9 +23,10 @@ const CustomDrawer = ({ auth, profile, history, firebase }) => (
       flexDirection: 'column',
     }}
     style={{
-      height: '100%',
+      width: opened ? 256 : 0,
+      transition: 'width 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms',
     }}
-    open
+    open={opened}
   >
     <MenuItem
       onTouchTap={() => history.push(HOME)}

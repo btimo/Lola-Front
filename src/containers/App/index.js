@@ -30,6 +30,18 @@ import {
 
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      openedDrawer: window.innerWidth > 780,
+    }
+  }
+
+  toggleDrawer() {
+    this.setState({ openedDrawer: !this.state.openedDrawer });
+  }
+
   render() {
     return (
       <div style={{
@@ -38,17 +50,19 @@ class App extends Component {
         display: 'flex',
         overflow: 'hidden',
       }}>
-        <CustomDrawer />
+        <CustomDrawer
+          opened={this.state.openedDrawer}
+        />
         <div
           style={{
             flex: 1,
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
           }}
         >
           <AppBar
             title={this.props.pageTitle}
-            showMenuIconButton={false}
+            onLeftIconButtonTouchTap={() => this.toggleDrawer()}
           />
           <Switch>
             <Route exact path={HOME} component={setPageTitleHoc('LOLA - Accueil')(Home)} />
