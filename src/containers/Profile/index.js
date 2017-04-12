@@ -24,6 +24,8 @@ import {
 
 import { UserIsAuthenticated } from '../../utils/router';
 
+import './styles.css';
+
 const ProfileForm = ({ mode, setEditMode, setReadMode, handleSubmit }) => (
   <div>
     <div
@@ -180,13 +182,7 @@ class Profile extends Component {
   render() {
     return (
       <div
-        style={{
-          flex: 1,
-          padding: 20,
-          display: 'flex',
-          position: 'relative',
-          flexDirection:'column',
-        }}
+        id="profile"
       >
         <Paper
           style={{
@@ -204,8 +200,7 @@ class Profile extends Component {
               lastname: this.props.profile ? this.props.profile.lastname: null,
             }}
           />
-          <Divider />
-          { this.props.profile && this.props.profile.type === 'patient' && (
+          { this.props.profile && this.props.profile.type === 'patient' && <Divider /> && (
             <DoctorTable
               doctors={this.props.doctors}
               acceptInvit={(t) => this.acceptInvit(t)}

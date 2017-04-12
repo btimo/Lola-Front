@@ -61,13 +61,13 @@ class App extends Component {
             flexDirection: 'column',
           }}
         >
-          <AppBar
+          {location.search.includes('noAppBar') ? null : <AppBar
             style={{
               width: '100vw',
             }}
             title={this.props.pageTitle}
             onLeftIconButtonTouchTap={() => this.toggleDrawer()}
-          />
+          />}
           <Switch>
             <Route exact path={HOME} component={setPageTitleHoc('LOLA - Accueil')(Home)} />
             <Route exact path={LOGIN} component={setPageTitleHoc('LOLA - Se connecter')(Login)} />
