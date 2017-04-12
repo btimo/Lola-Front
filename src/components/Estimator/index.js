@@ -38,7 +38,6 @@ const EstimatorRow = ({ id, index, deleteRowHandler, data }) => (
         name={`aliments-${id}`}
         component={CustomAutoComplete}
         floatingLabelText="Taper le nom de votre aliments"
-        filter={AutoComplete.fuzzyFilter}
         dataSource={data}
         maxSearchResults={5}
         fullWidth

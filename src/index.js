@@ -12,6 +12,7 @@ import { ConnectedRouter, routerMiddleware} from 'react-router-redux';
 import createBrowserHistory from 'history/createBrowserHistory';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import 'sanitize.css';
 import './index.css';
 
@@ -44,7 +45,12 @@ const store = createStore(
 );
 
 render(
-  <MuiThemeProvider>
+  <MuiThemeProvider
+    muiTheme={getMuiTheme({
+      palette: {
+        primary1Color: '#3598db',
+      }})}
+  >
     <Provider store={store}>
       <ConnectedRouter history={history}>
         <Route component={App} />
