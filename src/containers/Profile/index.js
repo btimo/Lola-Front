@@ -23,6 +23,56 @@ import {
 
 import { UserIsAuthenticated } from '../../utils/router';
 
+const ProfileForm = ({ mode, setEditMode, setReadMode, handleSubmit }) => (
+  <div>
+    <div
+      style={{
+        padding: 20,
+        display: 'flex',
+        justifyContent: 'flex-end'
+      }}
+    >
+      <IconButton
+        onTouchTap={mode === 'read' ? setEditMode : setReadMode}
+        iconClassName={mode === 'edit' ? 'mdi mdi-undo' : 'mdi mdi-account-edit'}
+        tooltip={ mode === 'edit' ? 'Annuler les changements' : 'Editer votre profil'}
+      />
+      { mode === 'edit' && (
+        <IconButton
+          onTouchTap={handleSubmit}
+          iconClassName="mdi mdi-content-save"
+          tooltip="Sauvegarder votre profil"
+        />
+      )}
+    </div>
+    <div
+      style={{
+        padding: 20,
+        display: 'flex',
+        justifyContent: 'space-around'
+      }}
+    >
+      <Field
+        name="lastname"
+        component={TextField}
+        floatingLabelText="Nom"
+        disabled={mode === 'read'}
+      />
+      <Field
+        name="firstname"
+        component={TextField}
+        floatingLabelText="Prénom"
+        disabled={mode === 'read'}
+      />
+    </div>
+  </div>
+);
+
+const ProfileF = reduxForm({
+  form: 'profile',
+  enableReinitialize: true,
+})(ProfileForm);
+
 class Profile extends Component {
   constructor(props) {
     super(props);
@@ -44,8 +94,15 @@ class Profile extends Component {
     this.setState({ mode: 'read' });
   }
 
-  saveProfile() {
-    console.log('saving profile ...');
+  saveProfile(values) {
+    this.props.firebase.update(
+      `/users/${this.props.authUID}`,
+      {
+        firstname: values.firstname,
+        lastname: values.lastname,
+      },
+    );
+
     this.setState({ mode: 'read' });
   }
 
@@ -66,46 +123,16 @@ class Profile extends Component {
             flexDirection: 'column',
           }}
         >
-          <div
-            style={{
-              padding: 20,
-              display: 'flex',
-              justifyContent: 'flex-end'
+          <ProfileF
+            mode={this.state.mode}
+            setEditMode={this.setEditMode}
+            setReadMode={this.setReadMode}
+            onSubmit={this.saveProfile}
+            initialValues={{
+              firstname: this.props.profile ? this.props.profile.firstname : null,
+              lastname: this.props.profile ? this.props.profile.lastname: null,
             }}
-          >
-            <IconButton
-              onTouchTap={this.state.mode === 'read' ? this.setEditMode : this.setReadMode}
-              iconClassName={this.state.mode === 'edit' ? 'mdi mdi-undo' : 'mdi mdi-account-edit'}
-              tooltip={ this.state.mode === 'edit' ? 'Annuler les changements' : 'Editer votre profil'}
-            />
-            { this.state.mode === 'edit' && (
-              <IconButton
-                onTouchTap={this.saveProfile}
-                iconClassName="mdi mdi-content-save"
-                tooltip="Sauvegarder votre profil"
-              />
-            )}
-          </div>
-          <div
-            style={{
-              padding: 20,
-              display: 'flex',
-              justifyContent: 'space-around'
-            }}
-          >
-            <Field
-              name="lastname"
-              component={TextField}
-              floatingLabelText="Nom"
-              disabled={this.state.mode === 'read'}
-            />
-            <Field
-              name="firstname"
-              component={TextField}
-              floatingLabelText="Prénom"
-              disabled={this.state.mode === 'read'}
-            />
-          </div>
+          />
           <Divider />
           { this.props.profile && this.props.profile.type === 'patient' && (
             <div
@@ -130,8 +157,8 @@ class Profile extends Component {
                   <TableBody
                     displayRowCheckbox={false}
                   >
-                    { isLoaded(this.props.doctors) && !isEmpty(this.props.doctors) && map(this.props.doctors, d => (
-                      <TableRow>
+                    { isLoaded(this.props.doctors) && !isEmpty(this.props.doctors) && map(this.props.doctors, (d, i) => (
+                      <TableRow key={`doctor-row-${i}`}>
                         <TableRowColumn>{d.doctor.lastname}</TableRowColumn>
                         <TableRowColumn>{d.doctor.firstname}</TableRowColumn>
                         <TableRowColumn>{d.status === 'invit' ? 'Invitation' : 'Actif'}</TableRowColumn>
@@ -172,18 +199,12 @@ const mapStateToProps = ({ firebase }) => {
   const doctors = populatedDataToJS(firebase, 'links', populates);
 
   return {
+    authUID,
     doctors: doctors ? filter(doctors, l => l.patient === authUID ) : null,
     profile: profile,
-    initialValues: {
-      firstname: profile ? profile.firstname : null,
-      lastname: profile ? profile.lastname: null,
-    },
   }
 };
 
 export default connect(mapStateToProps)(firebaseConnect([
   { path: '/links', populates },
-])(UserIsAuthenticated(reduxForm({
-  form: 'profile',
-  enableReinitialize: true,
-})(Profile))));
+])(UserIsAuthenticated(Profile)));
