@@ -5,7 +5,6 @@ import { Field, reduxForm } from 'redux-form';
 import { firebaseConnect, dataToJS } from 'react-redux-firebase';
 import {
   TextField,
-  AutoComplete as RFAutoComplete,
 } from 'redux-form-material-ui';
 import createComponent from 'redux-form-material-ui/lib/createComponent';
 import mapError from 'redux-form-material-ui/lib/mapError';
@@ -125,6 +124,9 @@ class Estimator extends Component {
   }
 
   render() {
+
+    const dose = (this.props.calc * 1.5) / 10;
+
     return (
       <div
         style={{
@@ -228,7 +230,7 @@ class Estimator extends Component {
                 alignItems: 'center',
               }}
             >
-              {(this.props.calc * 1.5) / 100}
+              {dose.toLocaleString('fr', { maximumFractionDigits: 1 })}
             </div>
           </div>
         </Toolbar>
@@ -269,9 +271,13 @@ const calculateGlucides = createSelector(
 
     const cleanse = compact(cleanedValues);
 
-    return cleanse && cleanse.reduce((acc, elem) => ((elem.aliment.glucides * elem.amount) / 100) + acc, 0);
+    return (cleanse && cleanse.reduce((acc, elem) => ((elem.aliment.glucides * elem.amount) / 100) + acc, 0)) || 0;
   }
 );
+
+Estimator.defaultProps = {
+  calc: 0,
+};
 
 export default connect((state) => {
   const aliments = getAliments(state);
