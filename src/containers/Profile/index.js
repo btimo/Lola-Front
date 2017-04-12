@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { reduxForm, Field } from 'redux-form';
 import { connect } from 'react-redux';
-import { pathToJS, populatedDataToJS, dataToJS, firebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase';
+import { pathToJS, populatedDataToJS, firebaseConnect, isLoaded, isEmpty } from 'react-redux-firebase';
 import map from 'lodash/map';
-import filter from 'lodash/filter';
+
+import { filterObject } from '../../utils/utils';
 
 import {
   TextField,
@@ -73,6 +74,57 @@ const ProfileF = reduxForm({
   enableReinitialize: true,
 })(ProfileForm);
 
+
+const DoctorTable = ({ doctors, acceptInvit, removeDoctor }) => (
+  <div
+    style={{
+      padding: 20,
+    }}
+  >
+    <h2>Mes médecins</h2>
+    <div>
+      <Table
+        selectable={false}
+      >
+        <TableHeader
+          adjustForCheckbox={false}
+          displaySelectAll={false}
+        >
+          <TableHeaderColumn>Nom</TableHeaderColumn>
+          <TableHeaderColumn>Prénom</TableHeaderColumn>
+          <TableHeaderColumn>Statut</TableHeaderColumn>
+          <TableHeaderColumn>Actions</TableHeaderColumn>
+        </TableHeader>
+        <TableBody
+          displayRowCheckbox={false}
+        >
+          { isLoaded(doctors) && !isEmpty(doctors) && map(doctors, (d, i) => (
+            <TableRow key={`doctor-row-${i}`}>
+              <TableRowColumn>{d.doctor.lastname}</TableRowColumn>
+              <TableRowColumn>{d.doctor.firstname}</TableRowColumn>
+              <TableRowColumn>{d.status === 'invit' ? 'Invitation' : 'Actif'}</TableRowColumn>
+              <TableRowColumn>
+                { d.status === 'invit' && (
+                  <IconButton
+                    iconClassName="mdi mdi-account-plus"
+                    tooltip="Accepter la liaison"
+                    onTouchTap={() => acceptInvit(i)}
+                  />
+                )}
+                <IconButton
+                  iconClassName="mdi mdi-delete"
+                  tooltip="Supprimer la liaison"
+                  onTouchTap={() => removeDoctor(i)}
+                />
+              </TableRowColumn>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </div>
+);
+
 class Profile extends Component {
   constructor(props) {
     super(props);
@@ -106,6 +158,25 @@ class Profile extends Component {
     this.setState({ mode: 'read' });
   }
 
+  acceptInvit(linkId) {
+    /*
+    this.props.firebase.push('links', {
+      doctor: "3X97xpOipUdf3JGtHeA5WNPwrzC2",
+      patient: this.props.authUID,
+      status: 'invit',
+    });
+    */
+
+    this.props.firebase.update(`links/${linkId}`, {
+      ...this.props.links.linkId,
+      status: 'active',
+    });
+  }
+
+  removeDoctor(linkId) {
+    this.props.firebase.remove(`links/${linkId}`);
+  }
+
   render() {
     return (
       <div
@@ -135,51 +206,11 @@ class Profile extends Component {
           />
           <Divider />
           { this.props.profile && this.props.profile.type === 'patient' && (
-            <div
-              style={{
-                padding: 20,
-              }}
-            >
-              <h2>Mes médecins</h2>
-              <div>
-                <Table
-                  selectable={false}
-                >
-                  <TableHeader
-                    adjustForCheckbox={false}
-                    displaySelectAll={false}
-                  >
-                    <TableHeaderColumn>Nom</TableHeaderColumn>
-                    <TableHeaderColumn>Prénom</TableHeaderColumn>
-                    <TableHeaderColumn>Statut</TableHeaderColumn>
-                    <TableHeaderColumn>Actions</TableHeaderColumn>
-                  </TableHeader>
-                  <TableBody
-                    displayRowCheckbox={false}
-                  >
-                    { isLoaded(this.props.doctors) && !isEmpty(this.props.doctors) && map(this.props.doctors, (d, i) => (
-                      <TableRow key={`doctor-row-${i}`}>
-                        <TableRowColumn>{d.doctor.lastname}</TableRowColumn>
-                        <TableRowColumn>{d.doctor.firstname}</TableRowColumn>
-                        <TableRowColumn>{d.status === 'invit' ? 'Invitation' : 'Actif'}</TableRowColumn>
-                        <TableRowColumn>
-                          { d.status === 'invit' && (
-                            <IconButton
-                              iconClassName="mdi mdi-account-plus"
-                              tooltip="Accepter la liaison"
-                            />
-                          )}
-                          <IconButton
-                            iconClassName="mdi mdi-delete"
-                            tooltip="Supprimer la liaison"
-                          />
-                        </TableRowColumn>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
+            <DoctorTable
+              doctors={this.props.doctors}
+              acceptInvit={(t) => this.acceptInvit(t)}
+              removeDoctor={(t) => this.removeDoctor(t)}
+            />
           )}
         </Paper>
       </div>
@@ -196,11 +227,12 @@ const mapStateToProps = ({ firebase }) => {
   const profile = pathToJS(firebase, 'profile');
   const auth = pathToJS(firebase, 'auth');
   const authUID = auth ? auth.uid : null;
-  const doctors = populatedDataToJS(firebase, 'links', populates);
+  const links = populatedDataToJS(firebase, 'links', populates);
 
   return {
     authUID,
-    doctors: doctors ? filter(doctors, l => l.patient === authUID ) : null,
+    links,
+    doctors: links ? filterObject(links, link => link.patient === authUID ) : null,
     profile: profile,
   }
 };

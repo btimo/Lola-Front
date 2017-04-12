@@ -1,8 +1,159 @@
-import React from 'react';
-import { UserIsAuthenticated, UserIsDoctor } from '../../utils/router'
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { firebaseConnect, pathToJS, populatedDataToJS, dataToJS } from 'react-redux-firebase';
+import { reduxForm, Field } from 'redux-form';
+import omit from 'lodash/omit';
+import map from 'lodash/map';
 
-const Patients = () => (
-  <div>Page Patients</div>
+// Material UI
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import FontIcon from 'material-ui/FontIcon';
+import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
+import AutoComplete from 'material-ui/AutoComplete';
+import Dialog from 'material-ui/Dialog';
+// ----
+
+import CustomAutoComplete from '../../components/CustomAutoComplete';
+
+import { UserIsAuthenticated, UserIsDoctor } from '../../utils/router';
+import { filterObject } from '../../utils/utils';
+
+const patientDialogActions = (handleClose, handleSubmit) => ([
+  <FlatButton
+    label="Annuler"
+    onTouchTap={handleClose}
+  />,
+  <RaisedButton
+    label="Ajouter"
+    primary
+    keyboardFocused
+    onTouchTap={handleSubmit}
+  />,
+]);
+
+const PatientDialogForm = ({ data, handleClose, handleSubmit }) => (
+  <Dialog
+    title="Dialog With Actions"
+    actions={patientDialogActions(handleClose, handleSubmit)}
+    modal={false}
+    open
+    onRequestClose={handleClose}
+  >
+    <div>
+      <Field
+        name="patient"
+        component={CustomAutoComplete}
+        floatingLabelText="Taper le nom de votre patient"
+        filter={AutoComplete.fuzzyFilter}
+        dataSource={data}
+        maxSearchResults={5}
+        fullWidth
+      />
+    </div>
+  </Dialog>
 );
 
-export default UserIsAuthenticated(UserIsDoctor(Patients));
+const PatientDialogF = reduxForm({
+  form: 'addPatient',
+})(PatientDialogForm);
+
+class PatientFormDialog extends Component {
+
+  handleSubmit(values) {
+    const newPArray = map(this.props.data, (p, k) => ({
+      text: `${p.firstname} ${p.lastname}`,
+      value: k,
+    }));
+
+    this.props.firebase.push('links', {
+      doctor: this.props.authUID,
+      patient: newPArray.find(p => p.text === values.patient).value,
+      status: 'invit',
+    });
+  }
+
+  render() {
+    return (
+      <PatientDialogF
+        onSubmit={(v) => this.handleSubmit(v)}
+        handleClose={this.props.handleClose}
+        data={map(this.props.data, p => `${p.firstname} ${p.lastname}`)}
+      />
+    );
+  }
+}
+
+class Patients extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      dialogOpened: false,
+    }
+  }
+
+  openDialog() {
+    this.setState({ dialogOpened: true });
+  }
+
+  closeDialog() {
+    this.setState({ dialogOpened: false });
+  }
+
+  render() {
+    return (
+      <div
+        style={{
+          position: 'relative',
+          flex: 1,
+        }}
+      >
+        {this.state.dialogOpened && (
+          <PatientFormDialog
+            handleClose={() => this.closeDialog()}
+            data={this.props.newPatients}
+            firebase={this.props.firebase}
+            authUID={this.props.authUID}
+          />
+        )}
+        <FloatingActionButton
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 20,
+          }}
+          onTouchTap={() => this.openDialog()}
+        >
+          <FontIcon className="mdi mdi-plus" />
+        </FloatingActionButton>
+      </div>
+    );
+  }
+}
+
+const populates = [
+  { child: 'patient', root: 'users' },
+];
+
+const mapStateToProps = (state) => {
+  const users = dataToJS(state.firebase, 'users');
+  const auth = pathToJS(state.firebase, 'auth');
+  const authUID = auth ? auth.uid : null;
+  const patients = users ? filterObject(users, u => u.type === 'patient') : null;
+  const links = populatedDataToJS(state.firebase, 'links', populates);
+  const myPatients = links ? filterObject(links, l => l.doctor === authUID) : null;
+  console.log(myPatients);
+  const newPatients = myPatients ? omit(patients, Object.keys(myPatients)): patients;
+
+  return {
+    authUID,
+    newPatients,
+    myPatients,
+  }
+};
+
+export default connect(mapStateToProps)(firebaseConnect([
+  'users',
+  { path: 'links', populates},
+])(UserIsAuthenticated(UserIsDoctor(Patients))));

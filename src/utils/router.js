@@ -43,7 +43,7 @@ export const UserIsDoctor = UserAuthWrapper({ // eslint-disable-line new-cap
   wrapperDisplayName: 'UserIsDoctor',
   LoadingComponent: LoadingSpinner,
   authSelector: ({ firebase }) => pathToJS(firebase, 'profile'),
-  predicate: profile => profile !== null && profile.type === 'doctor',
+  predicate: profile => profile != null && profile.type === 'doctor',
   failureRedirectPath: HOME,
   redirectAction: newLoc => (dispatch) => {
     dispatch(replace(newLoc));
@@ -64,7 +64,7 @@ export const UserIsPatient = UserAuthWrapper({ // eslint-disable-line new-cap
   wrapperDisplayName: 'UserIsPatient',
   LoadingComponent: LoadingSpinner,
   authSelector: ({ firebase }) => pathToJS(firebase, 'profile'),
-  predicate: profile => profile !== null && profile.type === 'patient',
+  predicate: profile => profile != null && profile.type === 'patient',
   failureRedirectPath: HOME,
   redirectAction: newLoc => (dispatch) => {
     dispatch(replace(newLoc));

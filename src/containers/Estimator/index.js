@@ -6,8 +6,7 @@ import { firebaseConnect, dataToJS } from 'react-redux-firebase';
 import {
   TextField,
 } from 'redux-form-material-ui';
-import createComponent from 'redux-form-material-ui/lib/createComponent';
-import mapError from 'redux-form-material-ui/lib/mapError';
+import CustomAutoComplete from '../../components/CustomAutoComplete';
 
 import filter from 'lodash/filter';
 import keys from 'lodash/keys';
@@ -24,18 +23,6 @@ import RaisedButton from 'material-ui/RaisedButton';
 import Toolbar from 'material-ui/Toolbar/Toolbar';
 import ToolbarTitle from 'material-ui/Toolbar/ToolbarTitle'
 //
-
-const CustomAutoComplete = createComponent(
-  AutoComplete,
-  ({ input: { onChange, value, ...inputProps }, ...props }) => ({
-    ...mapError(props),
-    ...inputProps,
-    searchText: value,
-    onBlur: () => {},
-    onUpdateInput: value => onChange(value),
-    onNewRequest: value => onChange(value),
-  }),
-);
 
 const Row = ({ id, index, deleteRowHandler, data }) => (
   <div
