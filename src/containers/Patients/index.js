@@ -1,18 +1,26 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { firebaseConnect, pathToJS, populatedDataToJS, dataToJS } from 'react-redux-firebase';
+import { firebaseConnect } from 'react-redux-firebase';
 import { reduxForm, Field } from 'redux-form';
-import find from 'lodash/find';
 import map from 'lodash/map';
-import reduce from 'lodash/reduce';
 
 // Material UI
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import FontIcon from 'material-ui/FontIcon';
 import FlatButton from 'material-ui/FlatButton';
+import IconButton from 'material-ui/IconButton';
 import RaisedButton from 'material-ui/RaisedButton';
 import AutoComplete from 'material-ui/AutoComplete';
 import Dialog from 'material-ui/Dialog';
+import Paper from 'material-ui/Paper';
+import {
+  Table,
+  TableBody,
+  TableHeader,
+  TableHeaderColumn,
+  TableRow,
+  TableRowColumn,
+} from 'material-ui/Table';
 // ----
 
 import CustomAutoComplete from '../../components/CustomAutoComplete';
@@ -23,6 +31,10 @@ import {
   getAuthUID,
   getMyPatients,
   getNewPatients,
+  getMyLinks,
+  getMyPopulatedLinks,
+  getPatientData,
+  getOnePatient,
 } from '../../selectors';
 
 const patientDialogActions = (handleClose, handleSubmit) => ([
@@ -33,7 +45,6 @@ const patientDialogActions = (handleClose, handleSubmit) => ([
   <RaisedButton
     label="Ajouter"
     primary
-    keyboardFocused
     onTouchTap={handleSubmit}
   />,
 ]);
@@ -91,13 +102,131 @@ class PatientFormDialog extends Component {
   }
 }
 
+const PatientTable = ({ links, showPatient, removePatient }) => (
+  <div
+    style={{
+      padding: 20,
+    }}
+  >
+    <h2>Mes patients</h2>
+    <div>
+      <Table
+        selectable={false}
+      >
+        <TableHeader
+          adjustForCheckbox={false}
+          displaySelectAll={false}
+        >
+          <TableHeaderColumn>Nom</TableHeaderColumn>
+          <TableHeaderColumn>Prénom</TableHeaderColumn>
+          <TableHeaderColumn>Statut</TableHeaderColumn>
+          <TableHeaderColumn>Actions</TableHeaderColumn>
+        </TableHeader>
+        <TableBody
+          displayRowCheckbox={false}
+        >
+          { links && map(links, (l, i) => (
+            <TableRow key={`patient-row-${i}`}>
+              <TableRowColumn>{l.patient.lastname}</TableRowColumn>
+              <TableRowColumn>{l.patient.firstname}</TableRowColumn>
+              <TableRowColumn>{l.status === 'invit' ? 'Invitation' : 'Actif'}</TableRowColumn>
+              <TableRowColumn>
+                { l.status === 'active' && (
+                  <IconButton
+                    iconClassName="mdi mdi-account-card-details"
+                    tooltip="Voir les données"
+                    onTouchTap={() => showPatient(i)}
+                  />
+                )}
+                <IconButton
+                  iconClassName="mdi mdi-delete"
+                  tooltip="Supprimer la liaison"
+                  onTouchTap={() => removePatient(i)}
+                />
+              </TableRowColumn>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  </div>
+);
+
+class PatientDataTable extends Component {
+  prettyType(t) {
+    switch (t) {
+      case 'measure':
+        return 'Mesure glycémique';
+      default:
+        return t.replace(/\b\w/g, l => l.toUpperCase());
+    }
+  }
+
+  render() {
+    return (
+      <Paper
+        style={{
+          padding: 20,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          <IconButton
+            iconClassName="mdi mdi-arrow-left"
+            tooltip="Revenir"
+            onTouchTap={() => this.props.goBack()}
+          />
+          <h3>Patient: {this.props.patient.firstname} {this.props.patient.lastname}</h3>
+        </div>
+        <Table
+          selectable={false}
+        >
+          <TableHeader
+            displaySelectAll={false}
+          >
+            <TableRow>
+              <TableHeaderColumn>Type</TableHeaderColumn>
+              <TableHeaderColumn>Date</TableHeaderColumn>
+              <TableHeaderColumn>Valeur</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody
+            displayRowCheckbox={false}
+          >
+            {this.props.data && map(this.props.data, (m, k) => (
+              <TableRow key={k} selectable={false}>
+                <TableRowColumn>{this.prettyType(m.type)}</TableRowColumn>
+                <TableRowColumn>{new Date(m.timestamp).toLocaleString()}</TableRowColumn>
+                <TableRowColumn>{m.value}</TableRowColumn>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    );
+  }
+}
+
+const PatientData = connect((state, ownProps) => ({
+  data: getPatientData(state, ownProps),
+  patient: getOnePatient(state, ownProps),
+}))(PatientDataTable);
+
 class Patients extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       dialogOpened: false,
-    }
+      patient: null,
+    };
+
+    this.showData = this.showData.bind(this);
+    this.removePatient = this.removePatient.bind(this);
   }
 
   openDialog() {
@@ -108,14 +237,39 @@ class Patients extends Component {
     this.setState({ dialogOpened: false });
   }
 
+  showData(id) {
+    this.setState({ patient: this.props.myLinks[id].patient });
+  }
+
+  goBack() {
+    this.setState({ patient: null });
+  }
+
+  removePatient(id) {
+    this.props.firebase.remove(`links/${id}`);
+  }
+
   render() {
     return (
       <div
         style={{
           position: 'relative',
+          padding: 20,
           flex: 1,
         }}
       >
+        <Paper>
+          { this.state.patient === null ? (<PatientTable
+            links={this.props.myPopulatedLinks}
+            showPatient={this.showData}
+            removePatient={this.removePatient}
+          />) : (
+            <PatientData
+              goBack={() => this.goBack()}
+              patientID={this.state.patient}
+            />)
+          }
+        </Paper>
         {this.state.dialogOpened && (
           <PatientFormDialog
             handleClose={() => this.closeDialog()}
@@ -148,10 +302,13 @@ const mapStateToProps = (state) => {
     authUID: getAuthUID(state),
     newPatients: getNewPatients(state),
     myPatients: getMyPatients(state),
+    myLinks: getMyLinks(state),
+    myPopulatedLinks: getMyPopulatedLinks(state),
   }
 };
 
 export default connect(mapStateToProps)(firebaseConnect([
   'users',
   'links',
+  'measures',
 ])(UserIsAuthenticated(UserIsDoctor(Patients))));

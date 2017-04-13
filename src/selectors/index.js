@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import { filterObject } from '../utils/utils';
 
-import { dataToJS, pathToJS } from 'react-redux-firebase';
+import { dataToJS, pathToJS, populatedDataToJS } from 'react-redux-firebase';
 
 import get from 'lodash/get';
 import find from 'lodash/find';
@@ -38,6 +38,20 @@ export const getMyLinks = createSelector(
   }
 );
 
+const populatedLinks = state => populatedDataToJS(state.firebase, 'links', [
+  { child: 'patient', root: 'users' },
+]);
+
+export const getMyPopulatedLinks = createSelector(
+  [populatedLinks, getAuthUID],
+  (links, authUID) => {
+    if (links) {
+      return filterObject(links, l => l.doctor === authUID)
+    }
+    return null;
+  }
+);
+
 export const getNewPatients = createSelector(
   [getMyLinks, getPatients],
   (myLinks, patients) => (myLinks ? reduce(patients, (acc, v, k) => {
@@ -59,4 +73,24 @@ export const getMyPatients = createSelector(
     ...acc,
     [l.patient]: patients[l.patient],
   }), {}) : null)
+);
+
+
+const measures = state => dataToJS(state.firebase, 'measures');
+
+export const getMyData = createSelector(
+  [measures, getAuthUID],
+  (measures, authUID) => ( measures ? filterObject(measures, m => m.user === authUID) : null)
+);
+
+const patientId = (state, ownProps) => ownProps.patientID;
+
+export const getPatientData = createSelector(
+  [measures, patientId],
+  (measures, id) => ( measures ? filterObject(measures, m => m.user === id) : null)
+);
+
+export const getOnePatient = createSelector(
+  [getMyPatients, patientId],
+  (myPatients, id) => (myPatients ? myPatients[id] : null)
 );

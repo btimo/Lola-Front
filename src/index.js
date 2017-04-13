@@ -49,7 +49,14 @@ render(
     muiTheme={getMuiTheme({
       palette: {
         primary1Color: '#3598db',
-      }})}
+      },
+      timePicker: {
+        headerColor: '#3598db',
+      },
+      datePicker: {
+        selectColor: '#3598db',
+      }
+    })}
   >
     <Provider store={store}>
       <ConnectedRouter history={history}>

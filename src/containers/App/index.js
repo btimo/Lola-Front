@@ -63,7 +63,7 @@ class App extends Component {
         >
           {location.search.includes('noAppBar') ? null : <AppBar
             style={{
-              width: '100vw',
+              maxWidth: '100vw',
             }}
             title={this.props.pageTitle}
             onLeftIconButtonTouchTap={() => this.toggleDrawer()}

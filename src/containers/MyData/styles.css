@@ -1,0 +1,30 @@
+#my-data {
+  padding: 20px;
+  overflow-y: auto;
+}
+#my-data-dialog-inputs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#my-data-dialog-inputs-time {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+#paper-data {
+  padding: 20px;
+}
+
+#paper-graph {
+  padding: 20px;
+}
+
+@media only screen and (max-width: 760px) {
+  #my-data-dialog-input-time {
+    flex-direction: column;
+  }
+}

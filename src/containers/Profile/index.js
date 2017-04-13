@@ -182,12 +182,7 @@ class Profile extends Component {
       <div
         id="profile"
       >
-        <Paper
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
+        <Paper>
           <ProfileF
             mode={this.state.mode}
             setEditMode={this.setEditMode}
